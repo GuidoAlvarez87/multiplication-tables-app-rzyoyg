@@ -124,6 +124,27 @@ export default function PracticeScreen() {
     startTimer();
   };
 
+  const handleExitSession = () => {
+    Alert.alert(
+      'Salir de la sesión',
+      '¿Estás seguro de que quieres salir? Se perderá el progreso actual.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Salir',
+          style: 'destructive',
+          onPress: () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+            router.push('/');
+          },
+        },
+      ]
+    );
+  };
+
   const finishSession = async () => {
     const sessionEndTime = Date.now();
     const sessionDuration = sessionEndTime - sessionStartTime;
@@ -209,12 +230,24 @@ export default function PracticeScreen() {
       <View style={commonStyles.container}>
         <View style={commonStyles.content}>
           <View style={styles.header}>
-            <Text style={styles.questionCounter}>
-              Pregunta {currentQuestion + 1} de {questionCount}
-            </Text>
-            <Text style={[styles.timer, timeLeft <= 3 && styles.timerWarning]}>
-              {timeLeft}s
-            </Text>
+            <View style={styles.headerLeft}>
+              <Text style={styles.questionCounter}>
+                Pregunta {currentQuestion + 1} de {questionCount}
+              </Text>
+            </View>
+            <View style={styles.headerCenter}>
+              <Text style={[styles.timer, timeLeft <= 3 && styles.timerWarning]}>
+                {timeLeft}s
+              </Text>
+            </View>
+            <View style={styles.headerRight}>
+              <Button
+                text="Salir"
+                onPress={handleExitSession}
+                style={styles.exitButton}
+                textStyle={styles.exitButtonText}
+              />
+            </View>
           </View>
 
           <View style={styles.questionContainer}>
@@ -260,47 +293,73 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 30,
   },
+  headerLeft: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerRight: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
   questionCounter: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.text,
     fontWeight: '600',
   },
   timer: {
-    fontSize: 24,
+    fontSize: 20,
     color: colors.accent,
     fontWeight: 'bold',
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
   timerWarning: {
     color: '#FF5252',
     backgroundColor: '#FFEBEE',
   },
+  exitButton: {
+    backgroundColor: '#F44336',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    minWidth: 60,
+  },
+  exitButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'white',
+  },
   questionContainer: {
     alignItems: 'center',
     marginBottom: 40,
+    paddingHorizontal: 20,
   },
   question: {
-    fontSize: 48,
+    fontSize: 36,
     fontWeight: 'bold',
     color: colors.text,
     textAlign: 'center',
+    lineHeight: 44,
   },
   optionsContainer: {
     width: '100%',
     paddingHorizontal: 20,
-    gap: 15,
+    gap: 12,
   },
   optionButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 20,
+    paddingVertical: 16,
     borderRadius: 12,
     marginBottom: 0,
   },
   optionText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   correctButton: {
