@@ -2,7 +2,7 @@ import { Text, View, SafeAreaView, ScrollView, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useState, useEffect } from 'react';
 import Button from '../components/Button';
-import { commonStyles, buttonStyles } from '../styles/commonStyles';
+import { commonStyles, buttonStyles, scale, verticalScale, moderateScale, screenWidth } from '../styles/commonStyles';
 import { StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -139,11 +139,11 @@ export default function StatisticsScreen() {
   }
 
   const stats = getTotalStats();
-  const screenWidth = Dimensions.get('window').width;
+  const chartWidth = Math.min(screenWidth - scale(40), 400);
 
   return (
     <SafeAreaView style={commonStyles.wrapper}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={commonStyles.container}>
           <View style={commonStyles.content}>
             <Text style={commonStyles.title}>Estadísticas</Text>
@@ -176,8 +176,8 @@ export default function StatisticsScreen() {
                   <Text style={styles.chartTitle}>Puntajes de las Últimas 10 Sesiones</Text>
                   <LineChart
                     data={getScoreChartData()}
-                    width={screenWidth - 40}
-                    height={220}
+                    width={chartWidth}
+                    height={verticalScale(200)}
                     chartConfig={{
                       backgroundColor: colors.backgroundAlt,
                       backgroundGradientFrom: colors.backgroundAlt,
@@ -186,10 +186,10 @@ export default function StatisticsScreen() {
                       color: (opacity = 1) => `rgba(100, 181, 246, ${opacity})`,
                       labelColor: (opacity = 1) => `rgba(227, 227, 227, ${opacity})`,
                       style: {
-                        borderRadius: 16
+                        borderRadius: scale(16)
                       },
                       propsForDots: {
-                        r: "6",
+                        r: scale(4).toString(),
                         strokeWidth: "2",
                         stroke: colors.accent
                       }
@@ -203,8 +203,8 @@ export default function StatisticsScreen() {
                   <Text style={styles.chartTitle}>Uso Semanal (minutos)</Text>
                   <LineChart
                     data={getUsageChartData()}
-                    width={screenWidth - 40}
-                    height={220}
+                    width={chartWidth}
+                    height={verticalScale(200)}
                     chartConfig={{
                       backgroundColor: colors.backgroundAlt,
                       backgroundGradientFrom: colors.backgroundAlt,
@@ -213,10 +213,10 @@ export default function StatisticsScreen() {
                       color: (opacity = 1) => `rgba(100, 181, 246, ${opacity})`,
                       labelColor: (opacity = 1) => `rgba(227, 227, 227, ${opacity})`,
                       style: {
-                        borderRadius: 16
+                        borderRadius: scale(16)
                       },
                       propsForDots: {
-                        r: "6",
+                        r: scale(4).toString(),
                         strokeWidth: "2",
                         stroke: colors.accent
                       }
@@ -242,7 +242,7 @@ export default function StatisticsScreen() {
                 <Button
                   text="Limpiar Estadísticas"
                   onPress={clearStatistics}
-                  style={[buttonStyles.backButton, { marginBottom: 20, backgroundColor: '#F44336' }]}
+                  style={[buttonStyles.backButton, { marginBottom: verticalScale(20), backgroundColor: '#F44336' }]}
                 />
               )}
               
@@ -263,66 +263,72 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: verticalScale(20),
+  },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 30,
-    paddingHorizontal: 20,
+    marginBottom: verticalScale(30),
+    paddingHorizontal: scale(10),
   },
   statCard: {
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: scale(12),
+    padding: scale(15),
     alignItems: 'center',
     width: '48%',
-    marginBottom: 15,
+    marginBottom: verticalScale(15),
     borderWidth: 1,
     borderColor: colors.grey,
+    minHeight: verticalScale(80),
+    justifyContent: 'center',
   },
   statNumber: {
-    fontSize: 28,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
     color: colors.accent,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: colors.text,
     textAlign: 'center',
-    marginTop: 5,
+    marginTop: verticalScale(5),
   },
   chartContainer: {
     alignItems: 'center',
-    marginBottom: 30,
-    paddingHorizontal: 20,
+    marginBottom: verticalScale(30),
+    paddingHorizontal: scale(10),
   },
   chartTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(16),
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 15,
+    marginBottom: verticalScale(15),
     textAlign: 'center',
   },
   chart: {
-    borderRadius: 16,
+    borderRadius: scale(16),
   },
   noDataContainer: {
     alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 40,
+    paddingVertical: verticalScale(60),
+    paddingHorizontal: scale(40),
   },
   noDataText: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: 'bold',
     color: colors.text,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: verticalScale(10),
   },
   noDataSubtext: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     color: colors.grey,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: moderateScale(22),
   },
 });

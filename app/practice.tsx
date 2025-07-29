@@ -2,7 +2,7 @@ import { Text, View, SafeAreaView, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
 import Button from '../components/Button';
-import { commonStyles, buttonStyles } from '../styles/commonStyles';
+import { commonStyles, buttonStyles, scale, verticalScale, moderateScale, screenWidth, screenHeight } from '../styles/commonStyles';
 import { StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -308,9 +308,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    height: 50,
+    paddingHorizontal: scale(10),
+    marginBottom: verticalScale(15),
+    height: verticalScale(50),
+    minHeight: 40,
   },
   headerLeft: {
     flex: 1,
@@ -325,18 +326,20 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   questionCounter: {
-    fontSize: 12,
+    fontSize: moderateScale(11),
     color: colors.text,
     fontWeight: '600',
   },
   timer: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     color: colors.accent,
     fontWeight: 'bold',
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: scale(8),
+    paddingVertical: verticalScale(3),
+    borderRadius: scale(10),
+    minWidth: scale(40),
+    textAlign: 'center',
   },
   timerWarning: {
     color: '#FF5252',
@@ -344,42 +347,51 @@ const styles = StyleSheet.create({
   },
   exitButton: {
     backgroundColor: '#F44336',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    minWidth: 50,
-    height: 32,
+    paddingHorizontal: scale(8),
+    paddingVertical: verticalScale(3),
+    borderRadius: scale(10),
+    minWidth: scale(45),
+    height: verticalScale(28),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   exitButtonText: {
-    fontSize: 11,
+    fontSize: moderateScale(10),
     fontWeight: '600',
     color: 'white',
   },
   questionContainer: {
     alignItems: 'center',
-    marginBottom: 30,
-    paddingHorizontal: 20,
+    marginBottom: verticalScale(25),
+    paddingHorizontal: scale(15),
+    flex: 0.3,
+    justifyContent: 'center',
+    minHeight: verticalScale(80),
   },
   question: {
-    fontSize: 28,
+    fontSize: moderateScale(screenHeight < 700 ? 22 : 28),
     fontWeight: 'bold',
     color: colors.text,
     textAlign: 'center',
-    lineHeight: 36,
+    lineHeight: moderateScale(screenHeight < 700 ? 28 : 36),
   },
   optionsContainer: {
     width: '100%',
-    paddingHorizontal: 20,
-    gap: 10,
+    paddingHorizontal: scale(15),
+    gap: verticalScale(8),
+    flex: 0.4,
+    justifyContent: 'center',
   },
   optionButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 12,
-    borderRadius: 12,
+    paddingVertical: verticalScale(12),
+    borderRadius: scale(12),
     marginBottom: 0,
+    minHeight: verticalScale(45),
+    justifyContent: 'center',
   },
   optionText: {
-    fontSize: 16,
+    fontSize: moderateScale(15),
     fontWeight: 'bold',
   },
   correctButton: {
@@ -390,18 +402,21 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     width: '100%',
-    paddingHorizontal: 20,
-    marginTop: 20,
+    paddingHorizontal: scale(15),
+    marginTop: verticalScale(15),
+    flex: 0.1,
+    justifyContent: 'flex-end',
+    paddingBottom: verticalScale(10),
   },
   progressBar: {
-    height: 6,
+    height: verticalScale(6),
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 3,
+    borderRadius: scale(3),
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: colors.accent,
-    borderRadius: 3,
+    borderRadius: scale(3),
   },
 });

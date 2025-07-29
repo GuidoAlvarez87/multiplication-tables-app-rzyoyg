@@ -1,7 +1,7 @@
 import { Text, View, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Button from '../components/Button';
-import { commonStyles, buttonStyles } from '../styles/commonStyles';
+import { commonStyles, buttonStyles, scale, verticalScale, moderateScale } from '../styles/commonStyles';
 import { StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
 
@@ -71,13 +71,13 @@ export default function ResultsScreen() {
             <Button
               text="Practicar de Nuevo"
               onPress={() => router.push('/setup')}
-              style={[buttonStyles.instructionsButton, { marginBottom: 20 }]}
+              style={[buttonStyles.instructionsButton, { marginBottom: verticalScale(20) }]}
             />
             
             <Button
               text="Ver Estadísticas"
               onPress={() => router.push('/statistics')}
-              style={[buttonStyles.backButton, { marginBottom: 20 }]}
+              style={[buttonStyles.backButton, { marginBottom: verticalScale(20) }]}
             />
             
             <Button
@@ -96,48 +96,49 @@ const styles = StyleSheet.create({
   scoreContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 4,
-    borderRadius: 100,
-    width: 150,
-    height: 150,
-    marginVertical: 30,
+    borderWidth: scale(4),
+    borderRadius: scale(75),
+    width: scale(130),
+    height: scale(130),
+    marginVertical: verticalScale(30),
   },
   scoreText: {
-    fontSize: 36,
+    fontSize: moderateScale(30),
     fontWeight: 'bold',
   },
   scoreLabel: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     color: colors.text,
-    marginTop: 5,
+    marginTop: verticalScale(5),
   },
   message: {
-    fontSize: 24,
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: verticalScale(30),
   },
   statsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
     width: '100%',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
+    paddingHorizontal: scale(10),
   },
   statItem: {
     alignItems: 'center',
     minWidth: '45%',
-    marginBottom: 20,
+    marginBottom: verticalScale(20),
   },
   statValue: {
-    fontSize: 28,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
     color: colors.accent,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: colors.text,
     textAlign: 'center',
-    marginTop: 5,
+    marginTop: verticalScale(5),
   },
 });

@@ -2,7 +2,7 @@ import { Text, View, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import Button from '../components/Button';
-import { commonStyles, buttonStyles } from '../styles/commonStyles';
+import { commonStyles, buttonStyles, scale, verticalScale, moderateScale } from '../styles/commonStyles';
 import NumberSelector from '../components/NumberSelector';
 
 export default function SetupScreen() {
@@ -31,8 +31,8 @@ export default function SetupScreen() {
         <View style={commonStyles.content}>
           <Text style={commonStyles.title}>Configuración</Text>
           
-          <View style={[commonStyles.card, { marginTop: 30, marginBottom: 20 }]}>
-            <Text style={[commonStyles.text, { marginBottom: 15 }]}>
+          <View style={[commonStyles.card, { marginTop: verticalScale(30), marginBottom: verticalScale(20) }]}>
+            <Text style={[commonStyles.text, { marginBottom: verticalScale(15) }]}>
               Número de preguntas: {questionCount}
             </Text>
             <NumberSelector
@@ -44,8 +44,8 @@ export default function SetupScreen() {
             />
           </View>
 
-          <View style={[commonStyles.card, { marginBottom: 40 }]}>
-            <Text style={[commonStyles.text, { marginBottom: 15 }]}>
+          <View style={[commonStyles.card, { marginBottom: verticalScale(40) }]}>
+            <Text style={[commonStyles.text, { marginBottom: verticalScale(15) }]}>
               Tiempo por pregunta: {timeLimit} segundos
             </Text>
             <NumberSelector
@@ -61,7 +61,7 @@ export default function SetupScreen() {
             <Button
               text="Comenzar"
               onPress={startPractice}
-              style={[buttonStyles.instructionsButton, { marginBottom: 20 }]}
+              style={[buttonStyles.instructionsButton, { marginBottom: verticalScale(20) }]}
             />
             
             <Button

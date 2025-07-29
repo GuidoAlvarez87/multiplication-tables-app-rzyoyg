@@ -2,7 +2,7 @@ import { Text, View, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { useState, useEffect } from 'react';
 import Button from '../components/Button';
-import { commonStyles, buttonStyles } from '../styles/commonStyles';
+import { commonStyles, buttonStyles, verticalScale } from '../styles/commonStyles';
 
 export default function MainScreen() {
   return (
@@ -12,11 +12,11 @@ export default function MainScreen() {
           <Text style={commonStyles.title}>Tablas de Multiplicar</Text>
           <Text style={commonStyles.text}>Practica las tablas de multiplicar del 1 al 12</Text>
           
-          <View style={[commonStyles.buttonContainer, { marginTop: 40 }]}>
+          <View style={[commonStyles.buttonContainer, { marginTop: verticalScale(40) }]}>
             <Button
               text="Comenzar Práctica"
               onPress={() => router.push('/setup')}
-              style={[buttonStyles.instructionsButton, { marginBottom: 20 }]}
+              style={[buttonStyles.instructionsButton, { marginBottom: verticalScale(20) }]}
             />
             
             <Button

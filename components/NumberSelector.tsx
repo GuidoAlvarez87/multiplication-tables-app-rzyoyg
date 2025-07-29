@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors } from '../styles/commonStyles';
+import { colors, scale, verticalScale, moderateScale } from '../styles/commonStyles';
 
 interface NumberSelectorProps {
   value: number;
@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.primary,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: scale(45),
+    height: scale(45),
+    borderRadius: scale(22.5),
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.text,
-    fontSize: 24,
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
   },
   buttonTextDisabled: {
@@ -75,16 +75,17 @@ const styles = StyleSheet.create({
   },
   valueContainer: {
     backgroundColor: colors.background,
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    marginHorizontal: 20,
-    borderRadius: 8,
+    paddingHorizontal: scale(25),
+    paddingVertical: verticalScale(12),
+    marginHorizontal: scale(15),
+    borderRadius: scale(8),
     borderWidth: 1,
     borderColor: colors.grey,
+    minWidth: scale(60),
   },
   valueText: {
     color: colors.text,
-    fontSize: 20,
+    fontSize: moderateScale(18),
     fontWeight: 'bold',
     textAlign: 'center',
   },
