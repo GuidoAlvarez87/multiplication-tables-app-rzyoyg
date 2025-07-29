@@ -10,6 +10,7 @@ export default function SetupScreen() {
   const [timeLimit, setTimeLimit] = useState(10);
 
   const startPractice = () => {
+    console.log('Starting practice with:', { questionCount, timeLimit });
     router.push({
       pathname: '/practice',
       params: {
@@ -17,6 +18,11 @@ export default function SetupScreen() {
         timeLimit: timeLimit.toString()
       }
     });
+  };
+
+  const handleGoBack = () => {
+    console.log('Going back to main menu');
+    router.push('/');
   };
 
   return (
@@ -60,7 +66,7 @@ export default function SetupScreen() {
             
             <Button
               text="Volver"
-              onPress={() => router.back()}
+              onPress={handleGoBack}
               style={buttonStyles.backButton}
             />
           </View>

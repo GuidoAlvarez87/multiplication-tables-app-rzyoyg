@@ -32,14 +32,19 @@ export default function PracticeScreen() {
   const questionStartTime = useRef(Date.now());
 
   useEffect(() => {
+    console.log('Practice screen mounted with params:', { questionCount, timeLimit });
     generateQuestions();
     startTimer();
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        console.log('Cleaning up timer');
+        clearInterval(timerRef.current);
+      }
     };
   }, []);
 
   const generateQuestions = () => {
+    console.log('Generating questions...');
     const newQuestions: Question[] = [];
     
     for (let i = 0; i < questionCount; i++) {
@@ -65,6 +70,7 @@ export default function PracticeScreen() {
     }
     
     setQuestions(newQuestions);
+    console.log('Generated', newQuestions.length, 'questions');
   };
 
   const startTimer = () => {
@@ -83,6 +89,7 @@ export default function PracticeScreen() {
   };
 
   const handleTimeUp = () => {
+    console.log('Time up for question');
     if (timerRef.current) clearInterval(timerRef.current);
     setSelectedAnswer(-1); // Mark as timeout
     setShowResult(true);
@@ -95,6 +102,7 @@ export default function PracticeScreen() {
   const handleAnswerSelect = (answer: number) => {
     if (selectedAnswer !== null) return;
     
+    console.log('Answer selected:', answer);
     if (timerRef.current) clearInterval(timerRef.current);
     
     const responseTime = Date.now() - questionStartTime.current;
@@ -105,6 +113,9 @@ export default function PracticeScreen() {
     
     if (answer === questions[currentQuestion].correctAnswer) {
       setScore(prev => prev + 1);
+      console.log('Correct answer!');
+    } else {
+      console.log('Incorrect answer');
     }
     
     setTimeout(() => {
@@ -114,10 +125,12 @@ export default function PracticeScreen() {
 
   const nextQuestion = () => {
     if (currentQuestion + 1 >= questionCount) {
+      console.log('Session finished');
       finishSession();
       return;
     }
     
+    console.log('Moving to next question');
     setCurrentQuestion(prev => prev + 1);
     setSelectedAnswer(null);
     setShowResult(false);
@@ -125,6 +138,7 @@ export default function PracticeScreen() {
   };
 
   const handleExitSession = () => {
+    console.log('Exit session requested');
     Alert.alert(
       'Salir de la sesión',
       '¿Estás seguro de que quieres salir? Se perderá el progreso actual.',
@@ -132,11 +146,13 @@ export default function PracticeScreen() {
         {
           text: 'Cancelar',
           style: 'cancel',
+          onPress: () => console.log('Exit cancelled'),
         },
         {
           text: 'Salir',
           style: 'destructive',
           onPress: () => {
+            console.log('Exiting session');
             if (timerRef.current) clearInterval(timerRef.current);
             router.push('/');
           },
@@ -146,6 +162,7 @@ export default function PracticeScreen() {
   };
 
   const finishSession = async () => {
+    console.log('Finishing session...');
     const sessionEndTime = Date.now();
     const sessionDuration = sessionEndTime - sessionStartTime;
     const finalScore = Math.round((score / questionCount) * 100 * (1 - totalTime / (questionCount * timeLimit * 1000)) * 100);
@@ -174,6 +191,7 @@ export default function PracticeScreen() {
       usage[today] = (usage[today] || 0) + sessionDuration;
       
       await AsyncStorage.setItem('weeklyUsage', JSON.stringify(usage));
+      console.log('Session data saved successfully');
     } catch (error) {
       console.log('Error saving session data:', error);
     }
@@ -291,7 +309,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 20,
+    height: 50,
   },
   headerLeft: {
     flex: 1,
@@ -306,18 +325,18 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   questionCounter: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text,
     fontWeight: '600',
   },
   timer: {
-    fontSize: 20,
+    fontSize: 16,
     color: colors.accent,
     fontWeight: 'bold',
     backgroundColor: colors.backgroundAlt,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   timerWarning: {
     color: '#FF5252',
@@ -325,41 +344,42 @@ const styles = StyleSheet.create({
   },
   exitButton: {
     backgroundColor: '#F44336',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    minWidth: 60,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    minWidth: 50,
+    height: 32,
   },
   exitButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: 'white',
   },
   questionContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
     paddingHorizontal: 20,
   },
   question: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: 'bold',
     color: colors.text,
     textAlign: 'center',
-    lineHeight: 44,
+    lineHeight: 36,
   },
   optionsContainer: {
     width: '100%',
     paddingHorizontal: 20,
-    gap: 12,
+    gap: 10,
   },
   optionButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderRadius: 12,
     marginBottom: 0,
   },
   optionText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   correctButton: {
@@ -371,17 +391,17 @@ const styles = StyleSheet.create({
   progressContainer: {
     width: '100%',
     paddingHorizontal: 20,
-    marginTop: 30,
+    marginTop: 20,
   },
   progressBar: {
-    height: 8,
+    height: 6,
     backgroundColor: colors.backgroundAlt,
-    borderRadius: 4,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: colors.accent,
-    borderRadius: 4,
+    borderRadius: 3,
   },
 });
