@@ -27,19 +27,19 @@ export default function DifficultyScreen() {
       id: 'intermediate',
       title: 'Intermedio',
       description: '4 alternativas de respuesta',
-      timeDescription: '5 segundos por pregunta',
+      timeDescription: '6 segundos por pregunta',
       icon: '🤔',
       color: '#FF9800',
-      timeLimit: 5
+      timeLimit: 6
     },
     {
       id: 'hard',
       title: 'Difícil',
       description: 'Escribe la respuesta con teclado numérico',
-      timeDescription: '3 segundos por pregunta',
+      timeDescription: '4 segundos por pregunta',
       icon: '🧠',
       color: '#F44336',
-      timeLimit: 3
+      timeLimit: 4
     }
   ];
 
