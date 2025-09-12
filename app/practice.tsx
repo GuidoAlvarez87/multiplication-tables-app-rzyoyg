@@ -25,7 +25,7 @@ export default function PracticeScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
-  const [score, setScore] = useState(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [totalTime, setTotalTime] = useState(0);
@@ -127,8 +127,8 @@ export default function PracticeScreen() {
     setShowResult(true);
     
     if (answer === questions[currentQuestion].correctAnswer) {
-      setScore(prev => prev + 1);
-      console.log('Correct answer!');
+      setCorrectAnswersCount(prev => prev + 1);
+      console.log('Correct answer! Total correct:', correctAnswersCount + 1);
     } else {
       console.log('Incorrect answer');
     }
@@ -182,6 +182,13 @@ export default function PracticeScreen() {
 
   const finishSession = async () => {
     console.log('Finishing session...');
+    console.log('Final stats:', {
+      correctAnswersCount,
+      questionCount,
+      answeredQuestions,
+      totalTime
+    });
+    
     const sessionEndTime = Date.now();
     const sessionDuration = sessionEndTime - sessionStartTime;
     
@@ -192,9 +199,14 @@ export default function PracticeScreen() {
     // Calculate final score safely
     let finalScore = 0;
     if (!allQuestionsSkipped && answeredQuestions > 0) {
-      const baseScore = (score / questionCount) * 100;
+      const baseScore = (correctAnswersCount / questionCount) * 100;
       const timeBonus = Math.max(0, 1 - totalTime / (questionCount * timeLimit * 1000));
       finalScore = Math.round(baseScore * (1 + timeBonus * 0.5));
+      console.log('Score calculation:', {
+        baseScore,
+        timeBonus,
+        finalScore
+      });
     }
     
     // Save session data
@@ -202,7 +214,7 @@ export default function PracticeScreen() {
       const sessionData = {
         date: new Date().toISOString(),
         score: finalScore,
-        correctAnswers: score,
+        correctAnswers: correctAnswersCount,
         totalQuestions: questionCount,
         totalTime: sessionDuration,
         averageResponseTime: answeredQuestions > 0 ? totalTime / answeredQuestions : 0,
@@ -232,7 +244,7 @@ export default function PracticeScreen() {
       pathname: '/results',
       params: {
         score: finalScore.toString(),
-        correctAnswers: score.toString(),
+        correctAnswers: correctAnswersCount.toString(),
         totalQuestions: questionCount.toString(),
         totalTime: Math.round(totalTime / 1000).toString(),
         allSkipped: allQuestionsSkipped.toString(),
