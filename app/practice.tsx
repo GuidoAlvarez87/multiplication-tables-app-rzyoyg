@@ -1,3 +1,4 @@
+
 import { Text, View, SafeAreaView, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
@@ -27,6 +28,7 @@ export default function PracticeScreen() {
   const [showResult, setShowResult] = useState(false);
   const [totalTime, setTotalTime] = useState(0);
   const [sessionStartTime] = useState(Date.now());
+  const [answeredQuestions, setAnsweredQuestions] = useState(0);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const questionStartTime = useRef(Date.now());
@@ -107,6 +109,7 @@ export default function PracticeScreen() {
     
     const responseTime = Date.now() - questionStartTime.current;
     setTotalTime(prev => prev + responseTime);
+    setAnsweredQuestions(prev => prev + 1);
     
     setSelectedAnswer(answer);
     setShowResult(true);
@@ -165,7 +168,18 @@ export default function PracticeScreen() {
     console.log('Finishing session...');
     const sessionEndTime = Date.now();
     const sessionDuration = sessionEndTime - sessionStartTime;
-    const finalScore = Math.round((score / questionCount) * 100 * (1 - totalTime / (questionCount * timeLimit * 1000)) * 100);
+    
+    // Check if all questions were skipped
+    const allQuestionsSkipped = answeredQuestions === 0;
+    console.log('All questions skipped:', allQuestionsSkipped);
+    
+    // Calculate final score safely
+    let finalScore = 0;
+    if (!allQuestionsSkipped && answeredQuestions > 0) {
+      const baseScore = (score / questionCount) * 100;
+      const timeBonus = Math.max(0, 1 - totalTime / (questionCount * timeLimit * 1000));
+      finalScore = Math.round(baseScore * (1 + timeBonus * 0.5));
+    }
     
     // Save session data
     try {
@@ -175,7 +189,8 @@ export default function PracticeScreen() {
         correctAnswers: score,
         totalQuestions: questionCount,
         totalTime: sessionDuration,
-        averageResponseTime: totalTime / questionCount
+        averageResponseTime: answeredQuestions > 0 ? totalTime / answeredQuestions : 0,
+        allSkipped: allQuestionsSkipped
       };
       
       const existingSessions = await AsyncStorage.getItem('sessions');
@@ -202,7 +217,8 @@ export default function PracticeScreen() {
         score: finalScore.toString(),
         correctAnswers: score.toString(),
         totalQuestions: questionCount.toString(),
-        totalTime: Math.round(totalTime / 1000).toString()
+        totalTime: Math.round(totalTime / 1000).toString(),
+        allSkipped: allQuestionsSkipped.toString()
       }
     });
   };
