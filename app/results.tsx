@@ -15,6 +15,15 @@ export default function ResultsScreen() {
   const allSkipped = params.allSkipped === 'true';
   const difficulty = params.difficulty as string || 'intermediate';
 
+  console.log('Results screen received params:', {
+    score,
+    correctAnswers,
+    totalQuestions,
+    totalTime,
+    allSkipped,
+    difficulty
+  });
+
   const getScoreMessage = () => {
     if (allSkipped) {
       return "Todas las preguntas fueron omitidas";
@@ -35,8 +44,18 @@ export default function ResultsScreen() {
   };
 
   const getAccuracy = () => {
-    if (totalQuestions === 0) return 0;
-    return Math.round((correctAnswers / totalQuestions) * 100);
+    if (totalQuestions === 0) {
+      console.log('Accuracy calculation: totalQuestions is 0, returning 0');
+      return 0;
+    }
+    const accuracy = Math.round((correctAnswers / totalQuestions) * 100);
+    console.log('Accuracy calculation:', {
+      correctAnswers,
+      totalQuestions,
+      calculation: `(${correctAnswers} / ${totalQuestions}) * 100`,
+      result: accuracy
+    });
+    return accuracy;
   };
 
   const getDifficultyLabel = () => {

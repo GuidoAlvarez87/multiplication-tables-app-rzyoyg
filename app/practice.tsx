@@ -34,6 +34,7 @@ export default function PracticeScreen() {
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const questionStartTime = useRef(Date.now());
+  const correctAnswersRef = useRef(0); // Use ref to track correct answers immediately
 
   useEffect(() => {
     console.log('Practice screen mounted with params:', { questionCount, timeLimit, difficulty });
@@ -116,7 +117,7 @@ export default function PracticeScreen() {
   const handleAnswerSelect = (answer: number) => {
     if (selectedAnswer !== null) return;
     
-    console.log('Answer selected:', answer);
+    console.log('Answer selected:', answer, 'Correct answer:', questions[currentQuestion].correctAnswer);
     if (timerRef.current) clearInterval(timerRef.current);
     
     const responseTime = Date.now() - questionStartTime.current;
@@ -126,11 +127,13 @@ export default function PracticeScreen() {
     setSelectedAnswer(answer);
     setShowResult(true);
     
+    // Check if answer is correct and update both state and ref
     if (answer === questions[currentQuestion].correctAnswer) {
+      correctAnswersRef.current += 1;
       setCorrectAnswersCount(prev => prev + 1);
-      console.log('Correct answer! Total correct:', correctAnswersCount + 1);
+      console.log('Correct answer! Total correct now:', correctAnswersRef.current);
     } else {
-      console.log('Incorrect answer');
+      console.log('Incorrect answer. Total correct remains:', correctAnswersRef.current);
     }
     
     setTimeout(() => {
@@ -182,8 +185,12 @@ export default function PracticeScreen() {
 
   const finishSession = async () => {
     console.log('Finishing session...');
+    
+    // Use the ref value for the most up-to-date correct answers count
+    const finalCorrectAnswers = correctAnswersRef.current;
+    
     console.log('Final stats:', {
-      correctAnswersCount,
+      correctAnswersCount: finalCorrectAnswers,
       questionCount,
       answeredQuestions,
       totalTime
@@ -199,13 +206,15 @@ export default function PracticeScreen() {
     // Calculate final score safely
     let finalScore = 0;
     if (!allQuestionsSkipped && answeredQuestions > 0) {
-      const baseScore = (correctAnswersCount / questionCount) * 100;
+      const baseScore = (finalCorrectAnswers / questionCount) * 100;
       const timeBonus = Math.max(0, 1 - totalTime / (questionCount * timeLimit * 1000));
       finalScore = Math.round(baseScore * (1 + timeBonus * 0.5));
       console.log('Score calculation:', {
         baseScore,
         timeBonus,
-        finalScore
+        finalScore,
+        finalCorrectAnswers,
+        questionCount
       });
     }
     
@@ -214,7 +223,7 @@ export default function PracticeScreen() {
       const sessionData = {
         date: new Date().toISOString(),
         score: finalScore,
-        correctAnswers: correctAnswersCount,
+        correctAnswers: finalCorrectAnswers,
         totalQuestions: questionCount,
         totalTime: sessionDuration,
         averageResponseTime: answeredQuestions > 0 ? totalTime / answeredQuestions : 0,
@@ -240,11 +249,20 @@ export default function PracticeScreen() {
       console.log('Error saving session data:', error);
     }
     
+    console.log('Navigating to results with params:', {
+      score: finalScore,
+      correctAnswers: finalCorrectAnswers,
+      totalQuestions: questionCount,
+      totalTime: Math.round(totalTime / 1000),
+      allSkipped: allQuestionsSkipped,
+      difficulty: difficulty
+    });
+    
     router.push({
       pathname: '/results',
       params: {
         score: finalScore.toString(),
-        correctAnswers: correctAnswersCount.toString(),
+        correctAnswers: finalCorrectAnswers.toString(),
         totalQuestions: questionCount.toString(),
         totalTime: Math.round(totalTime / 1000).toString(),
         allSkipped: allQuestionsSkipped.toString(),
