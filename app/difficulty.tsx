@@ -10,7 +10,6 @@ import { StyleSheet } from 'react-native';
 export default function DifficultyScreen() {
   const params = useLocalSearchParams();
   const questionCount = params.questionCount as string;
-  const timeLimit = params.timeLimit as string;
   
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
 
@@ -19,22 +18,28 @@ export default function DifficultyScreen() {
       id: 'easy',
       title: 'Fácil',
       description: 'Solo 2 alternativas de respuesta',
+      timeDescription: '10 segundos por pregunta',
       icon: '😊',
-      color: '#4CAF50'
+      color: '#4CAF50',
+      timeLimit: 10
     },
     {
       id: 'intermediate',
       title: 'Intermedio',
       description: '4 alternativas de respuesta',
+      timeDescription: '5 segundos por pregunta',
       icon: '🤔',
-      color: '#FF9800'
+      color: '#FF9800',
+      timeLimit: 5
     },
     {
       id: 'hard',
       title: 'Difícil',
       description: 'Escribe la respuesta con teclado numérico',
+      timeDescription: '3 segundos por pregunta',
       icon: '🧠',
-      color: '#F44336'
+      color: '#F44336',
+      timeLimit: 3
     }
   ];
 
@@ -49,12 +54,15 @@ export default function DifficultyScreen() {
       return;
     }
     
-    console.log('Starting practice with difficulty:', selectedDifficulty);
+    const selectedDifficultyData = difficulties.find(d => d.id === selectedDifficulty);
+    const timeLimit = selectedDifficultyData?.timeLimit || 5;
+    
+    console.log('Starting practice with difficulty:', selectedDifficulty, 'and time limit:', timeLimit);
     router.push({
       pathname: '/practice',
       params: {
         questionCount,
-        timeLimit,
+        timeLimit: timeLimit.toString(),
         difficulty: selectedDifficulty
       }
     });
@@ -104,6 +112,12 @@ export default function DifficultyScreen() {
                     ]}>
                       {difficulty.description}
                     </Text>
+                    <Text style={[
+                      styles.timeDescription,
+                      selectedDifficulty === difficulty.id && { opacity: 1, color: difficulty.color }
+                    ]}>
+                      {difficulty.timeDescription}
+                    </Text>
                   </View>
                   {selectedDifficulty === difficulty.id && (
                     <Text style={[styles.checkmark, { color: difficulty.color }]}>✓</Text>
@@ -150,7 +164,7 @@ const styles = StyleSheet.create({
     borderRadius: scale(15),
     padding: scale(20),
     width: '100%',
-    minHeight: verticalScale(80),
+    minHeight: verticalScale(90),
   },
   selectedDifficulty: {
     backgroundColor: colors.card,
@@ -173,12 +187,20 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(18),
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: verticalScale(5),
+    marginBottom: verticalScale(3),
   },
   difficultyDescription: {
     fontSize: moderateScale(14),
     color: colors.text,
     opacity: 0.7,
+    textAlign: 'left',
+    marginBottom: verticalScale(2),
+  },
+  timeDescription: {
+    fontSize: moderateScale(12),
+    color: colors.accent,
+    opacity: 0.8,
+    fontWeight: '600',
     textAlign: 'left',
   },
   checkmark: {
