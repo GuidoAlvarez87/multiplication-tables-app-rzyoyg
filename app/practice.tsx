@@ -3,6 +3,7 @@ import { Text, View, SafeAreaView, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
 import Button from '../components/Button';
+import NumericInput from '../components/NumericInput';
 import { commonStyles, buttonStyles, scale, verticalScale, moderateScale, screenWidth, screenHeight } from '../styles/commonStyles';
 import { StyleSheet } from 'react-native';
 import { colors } from '../styles/commonStyles';
@@ -19,6 +20,7 @@ export default function PracticeScreen() {
   const params = useLocalSearchParams();
   const questionCount = parseInt(params.questionCount as string) || 10;
   const timeLimit = parseInt(params.timeLimit as string) || 10;
+  const difficulty = params.difficulty as string || 'intermediate';
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -34,7 +36,7 @@ export default function PracticeScreen() {
   const questionStartTime = useRef(Date.now());
 
   useEffect(() => {
-    console.log('Practice screen mounted with params:', { questionCount, timeLimit });
+    console.log('Practice screen mounted with params:', { questionCount, timeLimit, difficulty });
     generateQuestions();
     startTimer();
     return () => {
@@ -46,7 +48,7 @@ export default function PracticeScreen() {
   }, []);
 
   const generateQuestions = () => {
-    console.log('Generating questions...');
+    console.log('Generating questions for difficulty:', difficulty);
     const newQuestions: Question[] = [];
     
     for (let i = 0; i < questionCount; i++) {
@@ -54,25 +56,35 @@ export default function PracticeScreen() {
       const num2 = Math.floor(Math.random() * 12) + 1;
       const correctAnswer = num1 * num2;
       
-      const options = [correctAnswer];
-      while (options.length < 4) {
-        const wrongAnswer = correctAnswer + Math.floor(Math.random() * 20) - 10;
-        if (wrongAnswer > 0 && !options.includes(wrongAnswer)) {
-          options.push(wrongAnswer);
-        }
+      let optionsCount = 4; // Default for intermediate
+      if (difficulty === 'easy') {
+        optionsCount = 2;
+      } else if (difficulty === 'hard') {
+        optionsCount = 0; // No options for hard mode
       }
       
-      // Shuffle options
-      for (let j = options.length - 1; j > 0; j--) {
-        const k = Math.floor(Math.random() * (j + 1));
-        [options[j], options[k]] = [options[k], options[j]];
+      const options = [correctAnswer];
+      
+      if (optionsCount > 0) {
+        while (options.length < optionsCount) {
+          const wrongAnswer = correctAnswer + Math.floor(Math.random() * 20) - 10;
+          if (wrongAnswer > 0 && !options.includes(wrongAnswer)) {
+            options.push(wrongAnswer);
+          }
+        }
+        
+        // Shuffle options
+        for (let j = options.length - 1; j > 0; j--) {
+          const k = Math.floor(Math.random() * (j + 1));
+          [options[j], options[k]] = [options[k], options[j]];
+        }
       }
       
       newQuestions.push({ num1, num2, correctAnswer, options });
     }
     
     setQuestions(newQuestions);
-    console.log('Generated', newQuestions.length, 'questions');
+    console.log('Generated', newQuestions.length, 'questions for', difficulty, 'difficulty');
   };
 
   const startTimer = () => {
@@ -124,6 +136,10 @@ export default function PracticeScreen() {
     setTimeout(() => {
       nextQuestion();
     }, 1500);
+  };
+
+  const handleNumericSubmit = (answer: number) => {
+    handleAnswerSelect(answer);
   };
 
   const nextQuestion = () => {
@@ -190,7 +206,8 @@ export default function PracticeScreen() {
         totalQuestions: questionCount,
         totalTime: sessionDuration,
         averageResponseTime: answeredQuestions > 0 ? totalTime / answeredQuestions : 0,
-        allSkipped: allQuestionsSkipped
+        allSkipped: allQuestionsSkipped,
+        difficulty: difficulty
       };
       
       const existingSessions = await AsyncStorage.getItem('sessions');
@@ -218,7 +235,8 @@ export default function PracticeScreen() {
         correctAnswers: score.toString(),
         totalQuestions: questionCount.toString(),
         totalTime: Math.round(totalTime / 1000).toString(),
-        allSkipped: allQuestionsSkipped.toString()
+        allSkipped: allQuestionsSkipped.toString(),
+        difficulty: difficulty
       }
     });
   };
@@ -247,6 +265,15 @@ export default function PracticeScreen() {
     return styles.optionButton;
   };
 
+  const getDifficultyLabel = () => {
+    switch (difficulty) {
+      case 'easy': return 'Fácil';
+      case 'intermediate': return 'Intermedio';
+      case 'hard': return 'Difícil';
+      default: return 'Intermedio';
+    }
+  };
+
   if (questions.length === 0) {
     return (
       <SafeAreaView style={commonStyles.wrapper}>
@@ -267,6 +294,9 @@ export default function PracticeScreen() {
             <View style={styles.headerLeft}>
               <Text style={styles.questionCounter}>
                 Pregunta {currentQuestion + 1} de {questionCount}
+              </Text>
+              <Text style={styles.difficultyLabel}>
+                {getDifficultyLabel()}
               </Text>
             </View>
             <View style={styles.headerCenter}>
@@ -290,17 +320,42 @@ export default function PracticeScreen() {
             </Text>
           </View>
 
-          <View style={styles.optionsContainer}>
-            {currentQ.options.map((option, index) => (
-              <Button
-                key={index}
-                text={option.toString()}
-                onPress={() => handleAnswerSelect(option)}
-                style={getButtonStyle(option)}
-                textStyle={styles.optionText}
+          <View style={styles.answerContainer}>
+            {difficulty === 'hard' ? (
+              <NumericInput
+                onSubmit={handleNumericSubmit}
+                disabled={showResult}
               />
-            ))}
+            ) : (
+              <View style={styles.optionsContainer}>
+                {currentQ.options.map((option, index) => (
+                  <Button
+                    key={index}
+                    text={option.toString()}
+                    onPress={() => handleAnswerSelect(option)}
+                    style={getButtonStyle(option)}
+                    textStyle={styles.optionText}
+                  />
+                ))}
+              </View>
+            )}
           </View>
+
+          {showResult && difficulty === 'hard' && (
+            <View style={styles.resultContainer}>
+              <Text style={[
+                styles.resultText,
+                selectedAnswer === currentQ.correctAnswer ? styles.correctText : styles.incorrectText
+              ]}>
+                {selectedAnswer === -1 
+                  ? `Tiempo agotado! La respuesta era: ${currentQ.correctAnswer}`
+                  : selectedAnswer === currentQ.correctAnswer 
+                    ? '¡Correcto! ✓' 
+                    : `Incorrecto. La respuesta era: ${currentQ.correctAnswer}`
+                }
+              </Text>
+            </View>
+          )}
 
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
@@ -326,8 +381,8 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: scale(10),
     marginBottom: verticalScale(15),
-    height: verticalScale(50),
-    minHeight: 40,
+    height: verticalScale(60),
+    minHeight: 50,
   },
   headerLeft: {
     flex: 1,
@@ -345,6 +400,12 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(11),
     color: colors.text,
     fontWeight: '600',
+  },
+  difficultyLabel: {
+    fontSize: moderateScale(9),
+    color: colors.accent,
+    fontWeight: '500',
+    marginTop: verticalScale(2),
   },
   timer: {
     fontSize: moderateScale(14),
@@ -380,7 +441,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: verticalScale(25),
     paddingHorizontal: scale(15),
-    flex: 0.3,
+    flex: 0.25,
     justifyContent: 'center',
     minHeight: verticalScale(80),
   },
@@ -391,11 +452,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: moderateScale(screenHeight < 700 ? 28 : 36),
   },
-  optionsContainer: {
+  answerContainer: {
     width: '100%',
     paddingHorizontal: scale(15),
+    flex: 0.45,
+    justifyContent: 'center',
+  },
+  optionsContainer: {
+    width: '100%',
     gap: verticalScale(8),
-    flex: 0.4,
     justifyContent: 'center',
   },
   optionButton: {
@@ -415,6 +480,23 @@ const styles = StyleSheet.create({
   },
   incorrectButton: {
     backgroundColor: '#F44336',
+  },
+  resultContainer: {
+    width: '100%',
+    paddingHorizontal: scale(15),
+    alignItems: 'center',
+    marginTop: verticalScale(10),
+  },
+  resultText: {
+    fontSize: moderateScale(16),
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  correctText: {
+    color: '#4CAF50',
+  },
+  incorrectText: {
+    color: '#F44336',
   },
   progressContainer: {
     width: '100%',

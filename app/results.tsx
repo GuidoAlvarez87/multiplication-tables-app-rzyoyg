@@ -13,103 +13,101 @@ export default function ResultsScreen() {
   const totalQuestions = parseInt(params.totalQuestions as string) || 0;
   const totalTime = parseInt(params.totalTime as string) || 0;
   const allSkipped = params.allSkipped === 'true';
-
-  console.log('Results screen params:', { score, correctAnswers, totalQuestions, totalTime, allSkipped });
+  const difficulty = params.difficulty as string || 'intermediate';
 
   const getScoreMessage = () => {
     if (allSkipped) {
-      return "Omisión de todas las preguntas";
+      return "Todas las preguntas fueron omitidas";
     }
-    if (score >= 90) return "¡Excelente trabajo!";
+    
+    if (score >= 90) return "¡Excelente!";
     if (score >= 70) return "¡Muy bien!";
-    if (score >= 50) return "¡Buen esfuerzo!";
+    if (score >= 50) return "¡Bien hecho!";
     return "¡Sigue practicando!";
   };
 
   const getScoreColor = () => {
-    if (allSkipped) return '#9E9E9E';
+    if (allSkipped) return colors.grey;
     if (score >= 90) return '#4CAF50';
-    if (score >= 70) return '#FF9800';
-    if (score >= 50) return '#FFC107';
+    if (score >= 70) return '#8BC34A';
+    if (score >= 50) return '#FF9800';
     return '#F44336';
   };
 
   const getAccuracy = () => {
-    if (allSkipped || totalQuestions === 0) return 0;
+    if (totalQuestions === 0) return 0;
     return Math.round((correctAnswers / totalQuestions) * 100);
+  };
+
+  const getDifficultyLabel = () => {
+    switch (difficulty) {
+      case 'easy': return 'Fácil';
+      case 'intermediate': return 'Intermedio';
+      case 'hard': return 'Difícil';
+      default: return 'Intermedio';
+    }
+  };
+
+  const getDifficultyIcon = () => {
+    switch (difficulty) {
+      case 'easy': return '😊';
+      case 'intermediate': return '🤔';
+      case 'hard': return '🧠';
+      default: return '🤔';
+    }
   };
 
   return (
     <SafeAreaView style={commonStyles.wrapper}>
       <View style={commonStyles.container}>
         <View style={commonStyles.content}>
-          <Text style={commonStyles.title}>
-            {allSkipped ? '¡Sesión Omitida!' : '¡Sesión Completada!'}
-          </Text>
+          <Text style={commonStyles.title}>Resultados</Text>
           
-          <View style={[styles.scoreContainer, { borderColor: getScoreColor() }]}>
-            <Text style={[styles.scoreText, { color: getScoreColor() }]}>
-              {allSkipped ? '0' : score}
+          <View style={[commonStyles.card, styles.scoreCard]}>
+            <Text style={[styles.scoreMessage, { color: getScoreColor() }]}>
+              {getScoreMessage()}
             </Text>
-            <Text style={styles.scoreLabel}>
-              {allSkipped ? 'omitido' : 'puntos'}
-            </Text>
+            
+            {!allSkipped && (
+              <Text style={[styles.scoreValue, { color: getScoreColor() }]}>
+                {score} puntos
+              </Text>
+            )}
           </View>
 
-          <Text style={[styles.message, { color: getScoreColor() }]}>
-            {getScoreMessage()}
-          </Text>
-
-          {allSkipped ? (
-            <View style={styles.skippedContainer}>
-              <Text style={styles.skippedText}>
-                No respondiste ninguna pregunta.
-              </Text>
-              <Text style={styles.skippedSubtext}>
-                ¡Inténtalo de nuevo y responde las preguntas para obtener un puntaje!
+          <View style={styles.statsContainer}>
+            <View style={styles.difficultyContainer}>
+              <Text style={styles.difficultyIcon}>{getDifficultyIcon()}</Text>
+              <Text style={styles.difficultyText}>
+                Nivel: {getDifficultyLabel()}
               </Text>
             </View>
-          ) : (
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{correctAnswers}</Text>
-                <Text style={styles.statLabel}>Respuestas correctas</Text>
-              </View>
-              
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{totalQuestions}</Text>
-                <Text style={styles.statLabel}>Total de preguntas</Text>
-              </View>
-              
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{totalTime}s</Text>
-                <Text style={styles.statLabel}>Tiempo total</Text>
-              </View>
-              
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{getAccuracy()}%</Text>
-                <Text style={styles.statLabel}>Precisión</Text>
-              </View>
-            </View>
-          )}
 
-          <View style={commonStyles.buttonContainer}>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Respuestas correctas:</Text>
+              <Text style={styles.statValue}>{correctAnswers} de {totalQuestions}</Text>
+            </View>
+            
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Precisión:</Text>
+              <Text style={styles.statValue}>{getAccuracy()}%</Text>
+            </View>
+            
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Tiempo total:</Text>
+              <Text style={styles.statValue}>{totalTime} segundos</Text>
+            </View>
+          </View>
+
+          <View style={[commonStyles.buttonContainer, { marginTop: verticalScale(40) }]}>
             <Button
-              text="Practicar de Nuevo"
+              text="Practicar de nuevo"
               onPress={() => router.push('/setup')}
               style={[buttonStyles.instructionsButton, { marginBottom: verticalScale(20) }]}
             />
             
-            {!allSkipped && (
-              <Button
-                text="Ver Estadísticas"
-                onPress={() => router.push('/statistics')}
-                style={[buttonStyles.backButton, { marginBottom: verticalScale(20) }]}
-              />
-            )}
-            
             <Button
-              text="Menú Principal"
+              text="Menú principal"
               onPress={() => router.push('/')}
               style={buttonStyles.backButton}
             />
@@ -121,71 +119,62 @@ export default function ResultsScreen() {
 }
 
 const styles = StyleSheet.create({
-  scoreContainer: {
+  scoreCard: {
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: scale(4),
-    borderRadius: scale(75),
-    width: scale(130),
-    height: scale(130),
-    marginVertical: verticalScale(30),
-  },
-  scoreText: {
-    fontSize: moderateScale(30),
-    fontWeight: 'bold',
-  },
-  scoreLabel: {
-    fontSize: moderateScale(14),
-    color: colors.text,
-    marginTop: verticalScale(5),
-  },
-  message: {
-    fontSize: moderateScale(20),
-    fontWeight: 'bold',
-    textAlign: 'center',
+    marginTop: verticalScale(20),
     marginBottom: verticalScale(30),
+    paddingVertical: verticalScale(30),
+  },
+  scoreMessage: {
+    fontSize: moderateScale(24),
+    fontWeight: 'bold',
+    marginBottom: verticalScale(10),
+    textAlign: 'center',
+  },
+  scoreValue: {
+    fontSize: moderateScale(36),
+    fontWeight: '800',
+    textAlign: 'center',
   },
   statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
     width: '100%',
-    marginBottom: verticalScale(40),
-    paddingHorizontal: scale(10),
+    gap: verticalScale(15),
   },
-  statItem: {
+  difficultyContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    minWidth: '45%',
-    marginBottom: verticalScale(20),
+    justifyContent: 'center',
+    marginBottom: verticalScale(10),
+    paddingVertical: verticalScale(10),
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: scale(10),
   },
-  statValue: {
+  difficultyIcon: {
     fontSize: moderateScale(24),
+    marginRight: scale(10),
+  },
+  difficultyText: {
+    fontSize: moderateScale(16),
     fontWeight: 'bold',
     color: colors.accent,
   },
-  statLabel: {
-    fontSize: moderateScale(12),
-    color: colors.text,
-    textAlign: 'center',
-    marginTop: verticalScale(5),
-  },
-  skippedContainer: {
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: scale(20),
-    marginBottom: verticalScale(40),
+    paddingVertical: verticalScale(8),
+    paddingHorizontal: scale(15),
+    backgroundColor: colors.backgroundAlt,
+    borderRadius: scale(8),
   },
-  skippedText: {
-    fontSize: moderateScale(16),
-    color: colors.text,
-    textAlign: 'center',
-    marginBottom: verticalScale(10),
-    fontWeight: '600',
-  },
-  skippedSubtext: {
+  statLabel: {
     fontSize: moderateScale(14),
     color: colors.text,
-    textAlign: 'center',
-    opacity: 0.7,
-    lineHeight: moderateScale(20),
+    fontWeight: '500',
+  },
+  statValue: {
+    fontSize: moderateScale(14),
+    color: colors.accent,
+    fontWeight: 'bold',
   },
 });

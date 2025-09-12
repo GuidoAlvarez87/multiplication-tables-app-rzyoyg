@@ -1,3 +1,4 @@
+
 import { Text, View, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -9,10 +10,10 @@ export default function SetupScreen() {
   const [questionCount, setQuestionCount] = useState(10);
   const [timeLimit, setTimeLimit] = useState(10);
 
-  const startPractice = () => {
-    console.log('Starting practice with:', { questionCount, timeLimit });
+  const goToDifficulty = () => {
+    console.log('Going to difficulty selection with:', { questionCount, timeLimit });
     router.push({
-      pathname: '/practice',
+      pathname: '/difficulty',
       params: {
         questionCount: questionCount.toString(),
         timeLimit: timeLimit.toString()
@@ -59,8 +60,8 @@ export default function SetupScreen() {
 
           <View style={commonStyles.buttonContainer}>
             <Button
-              text="Comenzar"
-              onPress={startPractice}
+              text="Continuar"
+              onPress={goToDifficulty}
               style={[buttonStyles.instructionsButton, { marginBottom: verticalScale(20) }]}
             />
             
