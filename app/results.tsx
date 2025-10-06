@@ -12,7 +12,7 @@ export default function ResultsScreen() {
   const correctAnswers = parseInt(params.correctAnswers as string) || 0;
   const totalQuestions = parseInt(params.totalQuestions as string) || 0;
   const totalTime = parseInt(params.totalTime as string) || 0;
-  const allSkipped = params.allSkipped === 'true';
+  const allIncorrect = params.allIncorrect === 'true';
   const difficulty = params.difficulty as string || 'intermediate';
 
   console.log('Results screen received params:', {
@@ -20,12 +20,12 @@ export default function ResultsScreen() {
     correctAnswers,
     totalQuestions,
     totalTime,
-    allSkipped,
+    allIncorrect,
     difficulty
   });
 
   const getScoreMessage = () => {
-    if (allSkipped) {
+    if (allIncorrect) {
       return "¡No te rindas!";
     }
     
@@ -36,7 +36,7 @@ export default function ResultsScreen() {
   };
 
   const getScoreColor = () => {
-    if (allSkipped) return '#FF9800';
+    if (allIncorrect) return '#FF9800';
     if (score >= 90) return '#4CAF50';
     if (score >= 70) return '#8BC34A';
     if (score >= 50) return '#FF9800';
@@ -82,7 +82,7 @@ export default function ResultsScreen() {
         <View style={commonStyles.content}>
           <Text style={commonStyles.title}>Resultados</Text>
           
-          {allSkipped ? (
+          {allIncorrect ? (
             <View style={[commonStyles.card, styles.scoreCard]}>
               <Text style={[styles.scoreMessage, { color: getScoreColor() }]}>
                 {getScoreMessage()}
@@ -91,11 +91,11 @@ export default function ResultsScreen() {
               <Text style={styles.skippedIcon}>😔</Text>
               
               <Text style={styles.skippedMessage}>
-                No respondiste ninguna pregunta
+                Todas las respuestas fueron incorrectas
               </Text>
               
               <Text style={styles.encouragementMessage}>
-                Todas las respuestas fueron incorrectas.{'\n'}
+                No obtuviste ninguna respuesta correcta.{'\n'}
                 ¡Sigue practicando para mejorar!
               </Text>
             </View>
@@ -129,7 +129,7 @@ export default function ResultsScreen() {
               <Text style={styles.statValue}>{getAccuracy()}%</Text>
             </View>
             
-            {!allSkipped && (
+            {!allIncorrect && (
               <View style={styles.statRow}>
                 <Text style={styles.statLabel}>Tiempo total:</Text>
                 <Text style={styles.statValue}>{totalTime} segundos</Text>

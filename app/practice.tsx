@@ -199,13 +199,13 @@ export default function PracticeScreen() {
     const sessionEndTime = Date.now();
     const sessionDuration = sessionEndTime - sessionStartTime;
     
-    // Check if all questions were skipped
-    const allQuestionsSkipped = answeredQuestions === 0;
-    console.log('All questions skipped:', allQuestionsSkipped);
+    // Check if no questions were answered correctly (all incorrect or skipped)
+    const allIncorrect = finalCorrectAnswers === 0;
+    console.log('All incorrect:', allIncorrect);
     
     // Calculate final score safely
     let finalScore = 0;
-    if (!allQuestionsSkipped && answeredQuestions > 0) {
+    if (finalCorrectAnswers > 0) {
       const baseScore = (finalCorrectAnswers / questionCount) * 100;
       const timeBonus = Math.max(0, 1 - totalTime / (questionCount * timeLimit * 1000));
       finalScore = Math.round(baseScore * (1 + timeBonus * 0.5));
@@ -227,7 +227,7 @@ export default function PracticeScreen() {
         totalQuestions: questionCount,
         totalTime: sessionDuration,
         averageResponseTime: answeredQuestions > 0 ? totalTime / answeredQuestions : 0,
-        allSkipped: allQuestionsSkipped,
+        allIncorrect: allIncorrect,
         difficulty: difficulty
       };
       
@@ -254,7 +254,7 @@ export default function PracticeScreen() {
       correctAnswers: finalCorrectAnswers,
       totalQuestions: questionCount,
       totalTime: Math.round(totalTime / 1000),
-      allSkipped: allQuestionsSkipped,
+      allIncorrect: allIncorrect,
       difficulty: difficulty
     });
     
@@ -265,7 +265,7 @@ export default function PracticeScreen() {
         correctAnswers: finalCorrectAnswers.toString(),
         totalQuestions: questionCount.toString(),
         totalTime: Math.round(totalTime / 1000).toString(),
-        allSkipped: allQuestionsSkipped.toString(),
+        allIncorrect: allIncorrect.toString(),
         difficulty: difficulty
       }
     });
