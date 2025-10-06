@@ -31,10 +31,11 @@ export default function PracticeScreen() {
   const [totalTime, setTotalTime] = useState(0);
   const [sessionStartTime] = useState(Date.now());
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
+  const [isFinishing, setIsFinishing] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const questionStartTime = useRef(Date.now());
-  const correctAnswersRef = useRef(0); // Use ref to track correct answers immediately
+  const correctAnswersRef = useRef(0);
 
   useEffect(() => {
     console.log('Practice screen mounted with params:', { questionCount, timeLimit, difficulty });
@@ -57,11 +58,11 @@ export default function PracticeScreen() {
       const num2 = Math.floor(Math.random() * 12) + 1;
       const correctAnswer = num1 * num2;
       
-      let optionsCount = 4; // Default for intermediate
+      let optionsCount = 4;
       if (difficulty === 'easy') {
         optionsCount = 2;
       } else if (difficulty === 'hard') {
-        optionsCount = 0; // No options for hard mode
+        optionsCount = 0;
       }
       
       const options = [correctAnswer];
@@ -74,7 +75,6 @@ export default function PracticeScreen() {
           }
         }
         
-        // Shuffle options
         for (let j = options.length - 1; j > 0; j--) {
           const k = Math.floor(Math.random() * (j + 1));
           [options[j], options[k]] = [options[k], options[j]];
@@ -107,17 +107,14 @@ export default function PracticeScreen() {
     console.log('Time up for question - marking as unanswered/incorrect');
     if (timerRef.current) clearInterval(timerRef.current);
     
-    // Track the time spent (full time limit)
     const responseTime = Date.now() - questionStartTime.current;
     setTotalTime(prev => prev + responseTime);
     
-    // Mark this question as answered (even though it timed out)
     setAnsweredQuestions(prev => prev + 1);
     
-    setSelectedAnswer(-1); // Mark as timeout
+    setSelectedAnswer(-1);
     setShowResult(true);
     
-    // Note: We don't increment correctAnswersRef here because the answer is incorrect
     console.log('Question timed out. Total correct remains:', correctAnswersRef.current);
     
     setTimeout(() => {
@@ -126,9 +123,9 @@ export default function PracticeScreen() {
   };
 
   const handleAnswerSelect = (answer: number) => {
-    if (selectedAnswer !== null) return;
+    if (selectedAnswer !== null || isFinishing) return;
     
-    console.log('Answer selected:', answer, 'Correct answer:', questions[currentQuestion].correctAnswer);
+    console.log('Answer selected:', answer, 'Correct answer:', questions[currentQuestion]?.correctAnswer);
     if (timerRef.current) clearInterval(timerRef.current);
     
     const responseTime = Date.now() - questionStartTime.current;
@@ -138,8 +135,7 @@ export default function PracticeScreen() {
     setSelectedAnswer(answer);
     setShowResult(true);
     
-    // Check if answer is correct and update both state and ref
-    if (answer === questions[currentQuestion].correctAnswer) {
+    if (questions[currentQuestion] && answer === questions[currentQuestion].correctAnswer) {
       correctAnswersRef.current += 1;
       setCorrectAnswersCount(prev => prev + 1);
       console.log('Correct answer! Total correct now:', correctAnswersRef.current);
@@ -157,6 +153,11 @@ export default function PracticeScreen() {
   };
 
   const nextQuestion = () => {
+    if (isFinishing) {
+      console.log('Already finishing session, skipping nextQuestion');
+      return;
+    }
+    
     if (currentQuestion + 1 >= questionCount) {
       console.log('Session finished');
       finishSession();
@@ -195,9 +196,18 @@ export default function PracticeScreen() {
   };
 
   const finishSession = async () => {
+    if (isFinishing) {
+      console.log('Already finishing session, skipping duplicate call');
+      return;
+    }
+    
+    setIsFinishing(true);
     console.log('Finishing session...');
     
-    // Use the ref value for the most up-to-date correct answers count
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
     const finalCorrectAnswers = correctAnswersRef.current;
     
     console.log('Final stats:', {
@@ -210,11 +220,9 @@ export default function PracticeScreen() {
     const sessionEndTime = Date.now();
     const sessionDuration = sessionEndTime - sessionStartTime;
     
-    // Check if no questions were answered correctly (all incorrect or skipped)
     const allIncorrect = finalCorrectAnswers === 0;
     console.log('All incorrect:', allIncorrect);
     
-    // Calculate final score safely
     let finalScore = 0;
     if (finalCorrectAnswers > 0) {
       const baseScore = (finalCorrectAnswers / questionCount) * 100;
@@ -229,7 +237,6 @@ export default function PracticeScreen() {
       });
     }
     
-    // Save session data
     try {
       const sessionData = {
         date: new Date().toISOString(),
@@ -248,7 +255,6 @@ export default function PracticeScreen() {
       
       await AsyncStorage.setItem('sessions', JSON.stringify(sessions));
       
-      // Update weekly usage
       const today = new Date().toISOString().split('T')[0];
       const weeklyUsage = await AsyncStorage.getItem('weeklyUsage');
       const usage = weeklyUsage ? JSON.parse(weeklyUsage) : {};
@@ -283,23 +289,24 @@ export default function PracticeScreen() {
   };
 
   const getButtonStyle = (option: number) => {
-    if (!showResult) return styles.optionButton;
+    if (!showResult || !questions[currentQuestion]) return styles.optionButton;
+    
+    const currentQ = questions[currentQuestion];
     
     if (selectedAnswer === -1) {
-      // Timeout case
-      if (option === questions[currentQuestion].correctAnswer) {
+      if (option === currentQ.correctAnswer) {
         return [styles.optionButton, styles.correctButton];
       }
       return styles.optionButton;
     }
     
     if (option === selectedAnswer) {
-      return option === questions[currentQuestion].correctAnswer
+      return option === currentQ.correctAnswer
         ? [styles.optionButton, styles.correctButton]
         : [styles.optionButton, styles.incorrectButton];
     }
     
-    if (option === questions[currentQuestion].correctAnswer) {
+    if (option === currentQ.correctAnswer) {
       return [styles.optionButton, styles.correctButton];
     }
     
@@ -315,17 +322,30 @@ export default function PracticeScreen() {
     }
   };
 
-  if (questions.length === 0) {
+  if (questions.length === 0 || isFinishing) {
     return (
       <SafeAreaView style={commonStyles.wrapper}>
         <View style={commonStyles.container}>
-          <Text style={commonStyles.text}>Cargando preguntas...</Text>
+          <Text style={commonStyles.text}>
+            {isFinishing ? 'Finalizando sesión...' : 'Cargando preguntas...'}
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   const currentQ = questions[currentQuestion];
+  
+  if (!currentQ) {
+    console.log('Current question is undefined, currentQuestion:', currentQuestion, 'questions.length:', questions.length);
+    return (
+      <SafeAreaView style={commonStyles.wrapper}>
+        <View style={commonStyles.container}>
+          <Text style={commonStyles.text}>Cargando pregunta...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={commonStyles.wrapper}>
