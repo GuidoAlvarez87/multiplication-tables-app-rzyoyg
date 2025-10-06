@@ -104,10 +104,21 @@ export default function PracticeScreen() {
   };
 
   const handleTimeUp = () => {
-    console.log('Time up for question');
+    console.log('Time up for question - marking as unanswered/incorrect');
     if (timerRef.current) clearInterval(timerRef.current);
+    
+    // Track the time spent (full time limit)
+    const responseTime = Date.now() - questionStartTime.current;
+    setTotalTime(prev => prev + responseTime);
+    
+    // Mark this question as answered (even though it timed out)
+    setAnsweredQuestions(prev => prev + 1);
+    
     setSelectedAnswer(-1); // Mark as timeout
     setShowResult(true);
+    
+    // Note: We don't increment correctAnswersRef here because the answer is incorrect
+    console.log('Question timed out. Total correct remains:', correctAnswersRef.current);
     
     setTimeout(() => {
       nextQuestion();
