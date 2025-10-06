@@ -26,7 +26,7 @@ export default function ResultsScreen() {
 
   const getScoreMessage = () => {
     if (allSkipped) {
-      return "Todas las preguntas fueron omitidas";
+      return "¡No te rindas!";
     }
     
     if (score >= 90) return "¡Excelente!";
@@ -36,7 +36,7 @@ export default function ResultsScreen() {
   };
 
   const getScoreColor = () => {
-    if (allSkipped) return colors.grey;
+    if (allSkipped) return '#FF9800';
     if (score >= 90) return '#4CAF50';
     if (score >= 70) return '#8BC34A';
     if (score >= 50) return '#FF9800';
@@ -82,17 +82,34 @@ export default function ResultsScreen() {
         <View style={commonStyles.content}>
           <Text style={commonStyles.title}>Resultados</Text>
           
-          <View style={[commonStyles.card, styles.scoreCard]}>
-            <Text style={[styles.scoreMessage, { color: getScoreColor() }]}>
-              {getScoreMessage()}
-            </Text>
-            
-            {!allSkipped && (
+          {allSkipped ? (
+            <View style={[commonStyles.card, styles.scoreCard]}>
+              <Text style={[styles.scoreMessage, { color: getScoreColor() }]}>
+                {getScoreMessage()}
+              </Text>
+              
+              <Text style={styles.skippedIcon}>😔</Text>
+              
+              <Text style={styles.skippedMessage}>
+                No respondiste ninguna pregunta
+              </Text>
+              
+              <Text style={styles.encouragementMessage}>
+                Todas las respuestas fueron incorrectas.{'\n'}
+                ¡Sigue practicando para mejorar!
+              </Text>
+            </View>
+          ) : (
+            <View style={[commonStyles.card, styles.scoreCard]}>
+              <Text style={[styles.scoreMessage, { color: getScoreColor() }]}>
+                {getScoreMessage()}
+              </Text>
+              
               <Text style={[styles.scoreValue, { color: getScoreColor() }]}>
                 {score} puntos
               </Text>
-            )}
-          </View>
+            </View>
+          )}
 
           <View style={styles.statsContainer}>
             <View style={styles.difficultyContainer}>
@@ -112,10 +129,12 @@ export default function ResultsScreen() {
               <Text style={styles.statValue}>{getAccuracy()}%</Text>
             </View>
             
-            <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Tiempo total:</Text>
-              <Text style={styles.statValue}>{totalTime} segundos</Text>
-            </View>
+            {!allSkipped && (
+              <View style={styles.statRow}>
+                <Text style={styles.statLabel}>Tiempo total:</Text>
+                <Text style={styles.statValue}>{totalTime} segundos</Text>
+              </View>
+            )}
           </View>
 
           <View style={[commonStyles.buttonContainer, { marginTop: verticalScale(40) }]}>
@@ -154,6 +173,25 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(36),
     fontWeight: '800',
     textAlign: 'center',
+  },
+  skippedIcon: {
+    fontSize: moderateScale(48),
+    marginVertical: verticalScale(15),
+  },
+  skippedMessage: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    color: colors.text,
+    textAlign: 'center',
+    marginBottom: verticalScale(15),
+  },
+  encouragementMessage: {
+    fontSize: moderateScale(14),
+    color: colors.text,
+    textAlign: 'center',
+    lineHeight: moderateScale(20),
+    paddingHorizontal: scale(20),
+    opacity: 0.8,
   },
   statsContainer: {
     width: '100%',
